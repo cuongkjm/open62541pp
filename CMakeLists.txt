@@ -115,6 +115,8 @@ add_library(
     open62541pp
     src/AccessControl.cpp
     src/HistoryDatabase.cpp
+    src/plugins/HistoryData/HistoryDataGathering.cpp
+    src/plugins/HistoryData/HistoryDataBackend.cpp
     src/Client.cpp
     src/Crypto.cpp
     src/DataType.cpp
