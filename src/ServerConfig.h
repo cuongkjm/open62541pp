@@ -20,6 +20,7 @@ namespace opcua {
 
 class Server;
 class AccessControlBase;
+class AbstractHistoryDatabase;
 
 class ServerConfig {
 public:
@@ -46,6 +47,10 @@ public:
         accessControl_.assign(std::move(accessControl));
         setHighestSecurityPolicyForUserTokenTransfer();
         copyUserTokenPoliciesToEndpoints();
+    }
+
+    void setHistoryDatabase(std::unique_ptr<AbstractHistoryDatabase> historyDatabase) {
+        historyDatabase_.assign(std::move(historyDatabase));
     }
 
     constexpr UA_ServerConfig* operator->() noexcept {
@@ -103,6 +108,7 @@ private:
     CustomDataTypes customDataTypes_{config_.customDataTypes};
     PluginManager<UA_Logger> logger_{config_.logger};
     PluginManager<UA_AccessControl> accessControl_{config_.accessControl};
+    PluginManager<UA_HistoryDatabase> historyDatabase_{config_.historyDatabase};
 };
 
 }  // namespace opcua

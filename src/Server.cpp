@@ -7,6 +7,7 @@
 #include <utility>  // move
 
 #include "open62541pp/AccessControl.h"
+#include "open62541pp/HistoryDatabase.h"
 #include "open62541pp/DataType.h"
 #include "open62541pp/ErrorHandling.h"
 #include "open62541pp/Event.h"
@@ -280,6 +281,10 @@ void Server::setAccessControl(AccessControlBase& accessControl) {
 void Server::setAccessControl(std::unique_ptr<AccessControlBase> accessControl) {
     connection_->config.setAccessControl(std::move(accessControl));
     connection_->applySessionRegistry();
+}
+
+void Server::setHistoryDatabase(std::unique_ptr<AbstractHistoryDatabase> database) {
+    connection_->config.setHistoryDatabase(std::move(database));
 }
 
 std::vector<Session> Server::getSessions() {

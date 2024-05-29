@@ -17,6 +17,7 @@
 // forward declaration
 namespace opcua {
 class AccessControlBase;
+class AbstractHistoryDatabase;
 class ByteString;
 class DataType;
 class Event;
@@ -120,6 +121,9 @@ public:
     /// Set custom access control (transfer ownership to Server).
     /// @note Supported since open62541 v1.3
     void setAccessControl(std::unique_ptr<AccessControlBase> accessControl);
+
+    /// Set custom history database (transfer ownership to Server)
+    void setHistoryDatabase(std::unique_ptr<AbstractHistoryDatabase> database);
 
     /// Set custom hostname, default: system's host name.
     void setCustomHostname(std::string_view hostname);
