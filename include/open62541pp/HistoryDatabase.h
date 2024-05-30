@@ -4,6 +4,7 @@
 #include "open62541/plugin/historydatabase.h"
 #include "open62541pp/Session.h"
 #include "open62541pp/plugins/PluginAdapter.h"
+#include "open62541pp/plugins/plugins/HistoryDataGathering.h"
 #include "open62541pp/types/Composed.h"
 #include "open62541pp/types/DataValue.h"
 #include "open62541pp/PluginAdapterUtil.h"
@@ -29,6 +30,7 @@ public:
 class HistoryDatabaseDefault : public AbstractHistoryDatabase
 {
 public:
+    HistoryDatabaseDefault(AbstractHistoryDataGathering* gather);
     // HistoryDatabase interface
     void setValue(Session &session, const NodeId &nodeId, bool historizing, const DataValue &value) override;
     void setEvent(const NodeId &originId, const NodeId &emitterId,
@@ -37,6 +39,9 @@ public:
                  const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
                  UA_Boolean releaseContinuationPoints, opcua::Span<const HistoryReadValueId> nodesToRead,
                  HistoryReadResponse *response, HistoryData * const historyData) override;
+
+private:
+    AbstractHistoryDataGathering* mGathering;
 };
 
 }

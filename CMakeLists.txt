@@ -115,6 +115,7 @@ add_library(
     open62541pp
     src/AccessControl.cpp
     src/HistoryDatabase.cpp
+    src/plugins/HistoryData/HistorizingNodeIdSettings.cpp
     src/plugins/HistoryData/HistoryDataGathering.cpp
     src/plugins/HistoryData/HistoryDataBackend.cpp
     src/Client.cpp

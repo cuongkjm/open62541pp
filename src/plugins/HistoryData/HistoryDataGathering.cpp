@@ -50,4 +50,15 @@ const HistorizingNodeIdSettings *AbstractHistoryDataGathering::getHistorizingSet
     return mNodeIdToSettings[nodeId].get();
 }
 
+void HistoryDataGatheringDefault::setValue(const NodeId &nodeId, bool historizing, const DataValue &dataValue)
+{
+    const auto* settings = getHistorizingSetting(nodeId);
+    if (settings == nullptr) {
+        return;
+    }
+    if (settings->getHistorizingUpdateStrategy() == UA_HISTORIZINGUPDATESTRATEGY_POLL) {
+        settings->getHistorizingBackend()->serverSetHistoryData(nodeId, historizing, dataValue);
+    }
+}
+
 }

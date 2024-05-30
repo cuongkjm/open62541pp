@@ -78,11 +78,18 @@ UA_HistoryDatabase AbstractHistoryDatabase::create()
     return hd;
 }
 
+HistoryDatabaseDefault::HistoryDatabaseDefault(AbstractHistoryDataGathering *gather)
+{
+    mGathering = gather;
+}
+
 void HistoryDatabaseDefault::setValue(
-    Session &session, const NodeId &nodeId, bool historizing,
+    [[maybe_unused]]Session &session, const NodeId &nodeId, bool historizing,
     const DataValue &value)
 {
-    std::cout << __FUNCTION__ << " " << nodeId.toString() << " - historizing: " << historizing << std::endl;
+    if (mGathering != nullptr) {
+        mGathering->setValue(nodeId, historizing, value);
+    }
 }
 
 void HistoryDatabaseDefault::setEvent(
