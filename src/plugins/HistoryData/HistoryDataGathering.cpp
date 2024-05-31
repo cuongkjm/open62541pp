@@ -33,15 +33,6 @@ StatusCode AbstractHistoryDataGathering::registerNodeId(
     return UA_STATUSCODE_GOOD;
 }
 
-StatusCode AbstractHistoryDataGathering::updateNodeIdSetting(const NodeId &nodeId, std::unique_ptr<HistorizingNodeIdSettings> settings)
-{
-    if (mNodeIdToSettings.find(nodeId) == mNodeIdToSettings.end()) {
-        return UA_STATUSCODE_BADNODEIDINVALID;
-    }
-    mNodeIdToSettings[nodeId] = std::move(settings);
-    return UA_STATUSCODE_GOOD;
-}
-
 const HistorizingNodeIdSettings *AbstractHistoryDataGathering::getHistorizingSetting(const NodeId &nodeId)
 {
     if (mNodeIdToSettings.find(nodeId) == mNodeIdToSettings.end()) {
@@ -50,14 +41,17 @@ const HistorizingNodeIdSettings *AbstractHistoryDataGathering::getHistorizingSet
     return mNodeIdToSettings[nodeId].get();
 }
 
-void HistoryDataGatheringDefault::setValue(const NodeId &nodeId, bool historizing, const DataValue &dataValue)
+void HistoryDataGatheringDefault::setValue(
+    [[maybe_unused]]Server *server, [[maybe_unused]]const std::optional<Session> &session,
+    const NodeId &nodeId, bool historizing,
+    const DataValue &value)
 {
     const auto* settings = getHistorizingSetting(nodeId);
     if (settings == nullptr) {
         return;
     }
     if (settings->getHistorizingUpdateStrategy() == UA_HISTORIZINGUPDATESTRATEGY_POLL) {
-        settings->getHistorizingBackend()->serverSetHistoryData(nodeId, historizing, dataValue);
+        settings->getHistorizingBackend()->serverSetHistoryData(nodeId, historizing, value);
     }
 }
 

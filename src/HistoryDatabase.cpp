@@ -8,27 +8,17 @@ static void setValueNative(
     UA_Server *server,
     void *hdbContext,
     const UA_NodeId *sessionId,
-    void *sessionContext,
+    [[maybe_unused]] void *sessionContext,
     const UA_NodeId *nodeId,
     UA_Boolean historizing,
     const UA_DataValue *value)
 {
     auto *hdPtr = static_cast<AbstractHistoryDatabase*>(hdbContext);
     auto session = getSession(server, sessionId);
-    return hdPtr->setValue(session.value(), asWrapperRef<NodeId>(nodeId), historizing, asWrapperRef<DataValue>(value));
-}
-
-static void setEventNative(
-    UA_Server *server,
-    void *hdbContext,
-    const UA_NodeId *originId,
-    const UA_NodeId *emitterId,
-    const UA_EventFilter *historicalEventFilter,
-    UA_EventFieldList *fieldList)
-{
-    auto hdPtr = static_cast<AbstractHistoryDatabase*>(hdbContext);
-    hdPtr->setEvent(asWrapperRef<NodeId>(originId), asWrapperRef<NodeId>(emitterId),
-                    asWrapperRef<EventFilter>(historicalEventFilter), asWrapperRef<EventFieldList>(fieldList));
+    auto serverWrapper = detail::getWrapper(server);
+    return hdPtr->setValue(serverWrapper, session,
+                           asWrapperRef<NodeId>(nodeId), historizing,
+                           asWrapperRef<DataValue>(value));
 }
 
 static void readRawNative(
@@ -67,7 +57,7 @@ UA_HistoryDatabase AbstractHistoryDatabase::create()
     UA_HistoryDatabase hd;
     hd.context = this;
     hd.setValue = &setValueNative;
-    hd.setEvent = &setEventNative;
+    hd.setEvent = nullptr;
     hd.readRaw = &readRawNative;
     hd.readModified = nullptr;
     hd.readEvent = nullptr;
@@ -83,20 +73,14 @@ HistoryDatabaseDefault::HistoryDatabaseDefault(AbstractHistoryDataGathering *gat
     mGathering = gather;
 }
 
-void HistoryDatabaseDefault::setValue(
-    [[maybe_unused]]Session &session, const NodeId &nodeId, bool historizing,
-    const DataValue &value)
+void HistoryDatabaseDefault::setValue([[maybe_unused]]Server *server,
+                                      [[maybe_unused]]const std::optional<Session> &session,
+                                      const NodeId &nodeId, bool historizing,
+                                      const DataValue &value)
 {
     if (mGathering != nullptr) {
-        mGathering->setValue(nodeId, historizing, value);
+        mGathering->setValue(server, session, nodeId, historizing, value);
     }
-}
-
-void HistoryDatabaseDefault::setEvent(
-    const NodeId &originId, const NodeId &emitterId,
-    const EventFilter &historicalEventFilter, const EventFieldList &fieldList)
-{
-    std::cout << __FUNCTION__ << std::endl;
 }
 
 void HistoryDatabaseDefault::readRaw(

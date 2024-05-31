@@ -14,9 +14,9 @@ namespace opcua {
 class AbstractHistoryDatabase : public PluginAdapter<UA_HistoryDatabase>
 {
 public:
-    virtual void setValue(Session& session, const NodeId& nodeId, bool historizing, const DataValue& value) = 0;
-    virtual void setEvent(const NodeId& originId, const NodeId& emitterId,
-                          const EventFilter& historicalEventFilter, const EventFieldList& fieldList) = 0;
+    virtual void setValue(Server* server, const std::optional<Session>& session,
+                          const NodeId& nodeId, bool historizing,
+                          const DataValue& value) = 0;
     virtual void readRaw(Session& session, const RequestHeader& requestHeader,
                          const ReadRawModifiedDetails& historyReadDetails, int32_t timestampsToReturn,
                          UA_Boolean releaseContinuationPoints, Span<const HistoryReadValueId> nodesToRead,
@@ -32,9 +32,9 @@ class HistoryDatabaseDefault : public AbstractHistoryDatabase
 public:
     HistoryDatabaseDefault(AbstractHistoryDataGathering* gather);
     // HistoryDatabase interface
-    void setValue(Session &session, const NodeId &nodeId, bool historizing, const DataValue &value) override;
-    void setEvent(const NodeId &originId, const NodeId &emitterId,
-                  const EventFilter &historicalEventFilter, const EventFieldList &fieldList) override;
+    void setValue(Server* server, const std::optional<Session>& session,
+                  const NodeId& nodeId, bool historizing,
+                  const DataValue& value) override;
     void readRaw(Session &session, const RequestHeader &requestHeader,
                  const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
                  UA_Boolean releaseContinuationPoints, opcua::Span<const HistoryReadValueId> nodesToRead,

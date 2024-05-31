@@ -8,10 +8,8 @@ void HistorizingNodeIdSettings::clear([[maybe_unused]]UA_HistorizingNodeIdSettin
 
 UA_HistorizingNodeIdSettings HistorizingNodeIdSettings::create()
 {
-    UA_HistorizingNodeIdSettings settings;
-    settings = mNativeSettings;
-    settings.historizingBackend = mHistoryDataBackend->create();
-    return settings;
+    mNativeSettings.historizingBackend = mHistoryDataBackend->create();
+    return mNativeSettings;
 }
 
 HistorizingNodeIdSettings::HistorizingNodeIdSettings(std::unique_ptr<AbstractHistoryDataBackend> historyDataBackend)
