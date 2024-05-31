@@ -1,4 +1,5 @@
 #include "open62541pp/HistoryDatabase.h"
+#include "open62541/plugin/log_stdout.h"
 #include "open62541pp/PluginAdapterUtil.h"
 #include <iostream>
 
@@ -15,7 +16,7 @@ static void setValueNative(
 {
     auto *hdPtr = static_cast<AbstractHistoryDatabase*>(hdbContext);
     auto session = getSession(server, sessionId);
-    auto serverWrapper = detail::getWrapper(server);
+    auto *serverWrapper = detail::getWrapper(server);
     return hdPtr->setValue(serverWrapper, session,
                            asWrapperRef<NodeId>(nodeId), historizing,
                            asWrapperRef<DataValue>(value));
@@ -35,13 +36,17 @@ static void readRawNative(
     UA_HistoryReadResponse *response,
     UA_HistoryData * const * const historyData)
 {
+    auto serverWrapper = detail::getWrapper(server);
     auto *hdPtr = static_cast<AbstractHistoryDatabase*>(hdbContext);
     auto session = getSession(server, sessionId);
     Span<const HistoryReadValueId> spanNodesToRead(asWrapper<HistoryReadValueId>(nodesToRead), nodesToReadSize);
 
-    hdPtr->readRaw(session.value(), asWrapperRef<RequestHeader>(requestHeader),
+    std::vector<HistoryData> vHistoryData;
+    hdPtr->readRaw(serverWrapper, session, asWrapperRef<RequestHeader>(requestHeader),
                    asWrapperRef<ReadRawModifiedDetails>(historyReadDetails), timestampsToReturn, releaseContinuationPoints,
-                   spanNodesToRead, asWrapper<HistoryReadResponse>(response), asWrapper<HistoryData>(*historyData));
+                   spanNodesToRead, asWrapper<HistoryReadResponse>(*response), vHistoryData);
+
+    //copy data from output
 }
 
 void AbstractHistoryDatabase::clear(UA_HistoryDatabase &hd) noexcept
@@ -84,12 +89,45 @@ void HistoryDatabaseDefault::setValue([[maybe_unused]]Server *server,
 }
 
 void HistoryDatabaseDefault::readRaw(
-    Session &session, const RequestHeader &requestHeader,
+    Server *server, const std::optional<Session> &session, const RequestHeader &requestHeader,
     const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
-    UA_Boolean releaseContinuationPoints, opcua::Span<const HistoryReadValueId> nodesToRead,
-    HistoryReadResponse *response, HistoryData * const historyData)
+    UA_Boolean releaseContinuationPoints, Span<const HistoryReadValueId> nodesToRead,
+    HistoryReadResponse &response, std::vector<HistoryData> &historyData)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    auto results = response.getResults();
+    historyData.clear();
+    historyData.resize(nodesToRead.size());
+    for (size_t index = 0; index < nodesToRead.size(); ++index) {
+        uint8_t byte = 0;
+        auto status = server->read<uint8_t>(nodesToRead[index].getNodeId(), AttributeId::AccessLevel, byte);
+        if (!status.isGood() || !(byte & UA_ACCESSLEVELMASK_HISTORYREAD)) {
+            results[index]->statusCode = UA_STATUSCODE_BADUSERACCESSDENIED;
+            continue;
+        }
+        UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND, "test cuongkjm ");
+
+        bool historizing = false;
+        server->read<bool>(nodesToRead[index].getNodeId(), AttributeId::Historizing, historizing);
+        
+        if (!historizing) {
+            results[index]->statusCode = UA_STATUSCODE_BADHISTORYOPERATIONINVALID;
+            continue;
+        }
+        
+        auto settings = mGathering->getHistorizingSetting(nodesToRead[index].getNodeId());
+        if (settings == nullptr || settings->getHistorizingBackend() == nullptr) {
+            results[index]->statusCode = UA_STATUSCODE_BADHISTORYOPERATIONINVALID;
+            continue;
+        }
+
+        auto* hb = settings->getHistorizingBackend();
+
+        hb->getHistoryData(server, session,
+                           requestHeader, historyReadDetails,
+                           timestampsToReturn, releaseContinuationPoints,
+                           nodesToRead[index], response, historyData);
+
+    }
 }
 
 }

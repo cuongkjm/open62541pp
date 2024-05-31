@@ -17,10 +17,10 @@ public:
     virtual void setValue(Server* server, const std::optional<Session>& session,
                           const NodeId& nodeId, bool historizing,
                           const DataValue& value) = 0;
-    virtual void readRaw(Session& session, const RequestHeader& requestHeader,
+    virtual void readRaw(Server* server, const std::optional<Session>& session, const RequestHeader& requestHeader,
                          const ReadRawModifiedDetails& historyReadDetails, int32_t timestampsToReturn,
                          UA_Boolean releaseContinuationPoints, Span<const HistoryReadValueId> nodesToRead,
-                         HistoryReadResponse* response, HistoryData* const historyData) = 0;
+                         HistoryReadResponse& response, std::vector<HistoryData>& historyData) = 0;
 
     // PluginAdapter interface
     void clear(UA_HistoryDatabase &hd) noexcept override;
@@ -35,10 +35,10 @@ public:
     void setValue(Server* server, const std::optional<Session>& session,
                   const NodeId& nodeId, bool historizing,
                   const DataValue& value) override;
-    void readRaw(Session &session, const RequestHeader &requestHeader,
-                 const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
-                 UA_Boolean releaseContinuationPoints, opcua::Span<const HistoryReadValueId> nodesToRead,
-                 HistoryReadResponse *response, HistoryData * const historyData) override;
+    void readRaw(Server* server, const std::optional<Session>& session, const RequestHeader& requestHeader,
+                 const ReadRawModifiedDetails& historyReadDetails, int32_t timestampsToReturn,
+                 UA_Boolean releaseContinuationPoints, Span<const HistoryReadValueId> nodesToRead,
+                 HistoryReadResponse& response, std::vector<HistoryData>& historyData) override;
 
 private:
     AbstractHistoryDataGathering* mGathering;

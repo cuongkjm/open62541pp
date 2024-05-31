@@ -518,12 +518,6 @@ ServerContext& getContext(Server& server) noexcept {
 
 }
 
-template<typename WrapperType>
-StatusCode Server::read(const NodeId &nodeId, AttributeId attId, WrapperType &wrapperType)
-{
-    return __UA_Server_read(handle(), nodeId.handle(), attId, asNative(&wrapperType));
-}
-
 // namespace detail
 
 }  // namespace opcua
