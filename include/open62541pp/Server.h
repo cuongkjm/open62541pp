@@ -178,6 +178,9 @@ public:
     Node<Server> getTypesNode();
     Node<Server> getViewsNode();
 
+    template<typename WrapperType>
+    StatusCode read(const NodeId& nodeId, AttributeId attId, WrapperType& wrapperType);
+
     UA_Server* handle() noexcept;
     const UA_Server* handle() const noexcept;
 
