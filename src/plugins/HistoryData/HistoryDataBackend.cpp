@@ -57,11 +57,17 @@ void HistoryDataBackendMemory::getHistoryData(
     const RequestHeader &requestHeader, const ReadRawModifiedDetails &historyReadDetails,
     int32_t timestampsToReturn,
     UA_Boolean releaseContinuationPoints,
-    const HistoryReadValueId &nodeToRead, HistoryReadResponse &response, std::vector<HistoryData> &historyData)
+    const HistoryReadValueId &nodeToRead, HistoryReadResponse &response, HistoryData &historyData)
 {
-    UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND, "cuongkjmlog %s - %s",
-                historyReadDetails.getStartTime().format("yyyy-mm-ddThh:mm:ssZ").c_str(),
-                historyReadDetails.getEndTime().format("yyyy-mm-ddThh:mm:ssZ").c_str());
+    std::vector<DataValue> vDataValue;
+    for (const auto &kv : mHistoryData) {
+        if (kv.first >= historyReadDetails.getStartTime() &&
+            kv.first <= historyReadDetails.getEndTime()
+            && vDataValue.size() < historyReadDetails.getNumValuesPerNode()) {
+            vDataValue.push_back(kv.second);
+        }
+    }
+    historyData = HistoryData(vDataValue);
 }
 
 }

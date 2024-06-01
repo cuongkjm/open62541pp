@@ -26,7 +26,7 @@ public:
         Server *server, const std::optional<Session> &session, const RequestHeader &requestHeader,
         const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
         UA_Boolean releaseContinuationPoints, const HistoryReadValueId& nodesToRead,
-        HistoryReadResponse &response, std::vector<HistoryData> &historyData) = 0;
+        HistoryReadResponse &response, HistoryData &historyData) = 0;
 };
 
 class HistoryDataBackendMemory : public AbstractHistoryDataBackend {
@@ -41,7 +41,7 @@ public:
         Server *server, const std::optional<Session> &session, const RequestHeader &requestHeader,
         const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
         UA_Boolean releaseContinuationPoints, const HistoryReadValueId& nodesToRead,
-        HistoryReadResponse &response, std::vector<HistoryData> &historyData) override;
+        HistoryReadResponse &response, HistoryData &historyData) override;
 
 private:
     std::map<DateTime, DataValue> mHistoryData;

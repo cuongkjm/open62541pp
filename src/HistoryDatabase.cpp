@@ -47,6 +47,12 @@ static void readRawNative(
                    spanNodesToRead, asWrapper<HistoryReadResponse>(*response), vHistoryData);
 
     //copy data from output
+    HistoryData* const data = asWrapper<HistoryData>(*historyData);
+    for (size_t i = 0; i < vHistoryData.size(); ++i) {
+        //copy data from historyItem to historyData
+        data[i] = vHistoryData[i];
+
+    }
 }
 
 void AbstractHistoryDatabase::clear(UA_HistoryDatabase &hd) noexcept
@@ -97,6 +103,7 @@ void HistoryDatabaseDefault::readRaw(
     auto results = response.getResults();
     historyData.clear();
     historyData.resize(nodesToRead.size());
+
     for (size_t index = 0; index < nodesToRead.size(); ++index) {
         uint8_t byte = 0;
         auto status = server->read<uint8_t>(nodesToRead[index].getNodeId(), AttributeId::AccessLevel, byte);
@@ -104,7 +111,6 @@ void HistoryDatabaseDefault::readRaw(
             results[index]->statusCode = UA_STATUSCODE_BADUSERACCESSDENIED;
             continue;
         }
-        UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND, "test cuongkjm ");
 
         bool historizing = false;
         server->read<bool>(nodesToRead[index].getNodeId(), AttributeId::Historizing, historizing);
@@ -125,7 +131,7 @@ void HistoryDatabaseDefault::readRaw(
         hb->getHistoryData(server, session,
                            requestHeader, historyReadDetails,
                            timestampsToReturn, releaseContinuationPoints,
-                           nodesToRead[index], response, historyData);
+                           nodesToRead[index], response, historyData[index]);
 
     }
 }
