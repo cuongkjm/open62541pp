@@ -39,25 +39,13 @@ void HistoryDataBackendMemory::serverSetHistoryData(
     mHistoryData[timestamp] = dataValue;
 }
 
-bool HistoryDataBackendMemory::boundSupported(
-    [[maybe_unused]]Server *server, [[maybe_unused]]const NodeId &session, [[maybe_unused]]const NodeId &nodeId)
-{
-    return true;
-}
-
-bool HistoryDataBackendMemory::timestampsToReturnSupported(
-    [[maybe_unused]] Server *server, [[maybe_unused]] const NodeId &session,
-    [[maybe_unused]] const NodeId &nodeId, [[maybe_unused]] TimestampsToReturn timestampsToReturn)
-{
-    return true;
-}
-
 void HistoryDataBackendMemory::getHistoryData(
-    Server *server, const std::optional<Session> &session,
-    const RequestHeader &requestHeader, const ReadRawModifiedDetails &historyReadDetails,
-    int32_t timestampsToReturn,
-    UA_Boolean releaseContinuationPoints,
-    const HistoryReadValueId &nodeToRead, HistoryReadResponse &response, HistoryData &historyData)
+    [[maybe_unused]] Server *server, [[maybe_unused]] const std::optional<Session> &session,
+    [[maybe_unused]] const RequestHeader &requestHeader, const ReadRawModifiedDetails &historyReadDetails,
+    [[maybe_unused]] int32_t timestampsToReturn,
+    [[maybe_unused]] UA_Boolean releaseContinuationPoints,
+    [[maybe_unused]] const HistoryReadValueId &nodeToRead, [[maybe_unused]] HistoryReadResponse &response,
+    HistoryData &historyData)
 {
     std::vector<DataValue> vDataValue;
     for (const auto &kv : mHistoryData) {

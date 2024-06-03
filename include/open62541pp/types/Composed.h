@@ -1985,6 +1985,86 @@ enum class PerformUpdateType : int32_t {
 };
 
 /**
+ * @see UA_ReadRawModifiedDetails
+ * @see https://reference.opcfoundation.org/Core/Part11/v104/docs/6.4.3
+ */
+class ReadRawModifiedDetails : public TypeWrapper<UA_ReadRawModifiedDetails, UA_TYPES_READRAWMODIFIEDDETAILS>
+{
+public:
+    using TypeWrapper::TypeWrapper;
+
+    UAPP_GETTER(UA_Boolean, getIsReadModified, isReadModified)
+    UAPP_GETTER_WRAPPER(DateTime, getStartTime, startTime)
+    UAPP_GETTER_WRAPPER(DateTime, getEndTime, endTime)
+    UAPP_GETTER(UA_UInt32, getNumValuesPerNode, numValuesPerNode)
+    UAPP_GETTER(UA_Boolean, getReturnBounds, returnBounds)
+};
+
+/**
+ * @see UA_HistoryReadValueId
+ */
+class HistoryReadValueId : public TypeWrapper<UA_HistoryReadValueId, UA_TYPES_HISTORYREADVALUEID>
+{
+public:
+    using TypeWrapper::TypeWrapper;
+    HistoryReadValueId(NodeId nodeId, std::string_view indexRange, QualifiedName dataEncoding, ByteString continuationPoint){
+        handle()->nodeId = detail::toNative(std::move(nodeId));
+        handle()->indexRange = detail::toNative(indexRange);
+        handle()->dataEncoding = detail::toNative(std::move(dataEncoding));
+        handle()->continuationPoint = detail::toNative(std::move(continuationPoint));
+    }
+
+    UAPP_GETTER_WRAPPER(NodeId, getNodeId, nodeId)
+    UAPP_GETTER_WRAPPER(String, getIndexRange, indexRange)
+    UAPP_GETTER_WRAPPER(QualifiedName, getDataEncoding, dataEncoding)
+    UAPP_GETTER_WRAPPER(ByteString, getContinuationPoint, continuationPoint)
+};
+
+/**
+ * @see UA_HistoryReadResult
+ */
+class HistoryReadResult : public TypeWrapper<UA_HistoryReadResult, UA_TYPES_HISTORYREADRESULT>
+{
+    using TypeWrapper::TypeWrapper;
+
+    UAPP_GETTER_WRAPPER(StatusCode, getStatusCode, statusCode)
+    UAPP_GETTER_WRAPPER(ByteString, getContinuationPoint, continuationPoint)
+    UAPP_GETTER_WRAPPER(ExtensionObject, getHistoryData, historyData)
+};
+
+/**
+ * @see UA_HistoryReadResponse
+ */
+class HistoryReadResponse : public TypeWrapper<UA_HistoryReadResponse, UA_TYPES_HISTORYREADRESPONSE>
+{
+public:
+    using TypeWrapper::TypeWrapper;
+
+    UAPP_GETTER_WRAPPER(ResponseHeader, getResponseHeader, responseHeader)
+    UAPP_GETTER_SPAN_WRAPPER(HistoryReadResult, getResults, results, resultsSize)
+    UAPP_GETTER_SPAN_WRAPPER(DiagnosticInfo, getDiagnosticInfos, diagnosticInfos, diagnosticInfosSize)
+};
+
+/**
+ * @see UA_HistoryData
+ * @see https://reference.opcfoundation.org/Core/Part11/v104/docs/6.5.2
+ */
+class HistoryData : public TypeWrapper<UA_HistoryData, UA_TYPES_HISTORYDATA>
+{
+public:
+    using TypeWrapper::TypeWrapper;
+
+    HistoryData(Span<const DataValue> dataValues) {
+        handle()->dataValuesSize = dataValues.size();
+        handle()->dataValues = detail::toNativeArray(dataValues);
+    }
+
+    UAPP_GETTER_SPAN_WRAPPER(DataValue, getDataValues, dataValues, dataValuesSize)
+};
+
+
+
+/**
  * @}
  */
 

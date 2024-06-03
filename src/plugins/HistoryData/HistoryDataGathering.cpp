@@ -50,7 +50,7 @@ void HistoryDataGatheringDefault::setValue(
     if (settings == nullptr) {
         return;
     }
-    if (settings->getHistorizingUpdateStrategy() == UA_HISTORIZINGUPDATESTRATEGY_POLL) {
+    if (settings->getHistorizingUpdateStrategy() == UA_HISTORIZINGUPDATESTRATEGY_VALUESET) {
         settings->getHistorizingBackend()->serverSetHistoryData(nodeId, historizing, value);
     }
 }

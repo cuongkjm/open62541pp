@@ -1,7 +1,5 @@
 #include "open62541pp/HistoryDatabase.h"
-#include "open62541/plugin/log_stdout.h"
 #include "open62541pp/PluginAdapterUtil.h"
-#include <iostream>
 
 namespace opcua {
 
@@ -36,7 +34,7 @@ static void readRawNative(
     UA_HistoryReadResponse *response,
     UA_HistoryData * const * const historyData)
 {
-    auto serverWrapper = detail::getWrapper(server);
+    auto *serverWrapper = detail::getWrapper(server);
     auto *hdPtr = static_cast<AbstractHistoryDatabase*>(hdbContext);
     auto session = getSession(server, sessionId);
     Span<const HistoryReadValueId> spanNodesToRead(asWrapper<HistoryReadValueId>(nodesToRead), nodesToReadSize);
@@ -47,11 +45,10 @@ static void readRawNative(
                    spanNodesToRead, asWrapper<HistoryReadResponse>(*response), vHistoryData);
 
     //copy data from output
-    HistoryData* const data = asWrapper<HistoryData>(*historyData);
+    auto* const data = asWrapper<HistoryData>(*historyData);
     for (size_t i = 0; i < vHistoryData.size(); ++i) {
         //copy data from historyItem to historyData
         data[i] = vHistoryData[i];
-
     }
 }
 
@@ -105,22 +102,7 @@ void HistoryDatabaseDefault::readRaw(
     historyData.resize(nodesToRead.size());
 
     for (size_t index = 0; index < nodesToRead.size(); ++index) {
-        uint8_t byte = 0;
-        auto status = server->read<uint8_t>(nodesToRead[index].getNodeId(), AttributeId::AccessLevel, byte);
-        if (!status.isGood() || !(byte & UA_ACCESSLEVELMASK_HISTORYREAD)) {
-            results[index]->statusCode = UA_STATUSCODE_BADUSERACCESSDENIED;
-            continue;
-        }
-
-        bool historizing = false;
-        server->read<bool>(nodesToRead[index].getNodeId(), AttributeId::Historizing, historizing);
-        
-        if (!historizing) {
-            results[index]->statusCode = UA_STATUSCODE_BADHISTORYOPERATIONINVALID;
-            continue;
-        }
-        
-        auto settings = mGathering->getHistorizingSetting(nodesToRead[index].getNodeId());
+        const auto* settings = mGathering->getHistorizingSetting(nodesToRead[index].getNodeId());
         if (settings == nullptr || settings->getHistorizingBackend() == nullptr) {
             results[index]->statusCode = UA_STATUSCODE_BADHISTORYOPERATIONINVALID;
             continue;

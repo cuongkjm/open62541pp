@@ -18,10 +18,6 @@ public:
     UA_HistoryDataBackend create() override;
 
     virtual void serverSetHistoryData(const NodeId &nodeId, bool historizing, const DataValue &dataValue) = 0;
-    virtual bool boundSupported(Server *server, const NodeId& session, const NodeId& nodeId) = 0;
-    virtual bool timestampsToReturnSupported(
-        Server* server, const NodeId& session,
-        const NodeId& nodeId, TimestampsToReturn timestampsToReturn) = 0;
     virtual void getHistoryData(
         Server *server, const std::optional<Session> &session, const RequestHeader &requestHeader,
         const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
@@ -33,10 +29,6 @@ class HistoryDataBackendMemory : public AbstractHistoryDataBackend {
 public:
     // AbstractHistoryDataBackend interface
     void serverSetHistoryData(const NodeId &nodeId, bool historizing, const DataValue &dataValue) override;
-    bool boundSupported(Server *server, const NodeId &session, const NodeId &nodeId) override;
-    bool timestampsToReturnSupported(
-        Server *server, const NodeId &session,
-        const NodeId &nodeId, TimestampsToReturn timestampsToReturn) override;
     void getHistoryData(
         Server *server, const std::optional<Session> &session, const RequestHeader &requestHeader,
         const ReadRawModifiedDetails &historyReadDetails, int32_t timestampsToReturn,
